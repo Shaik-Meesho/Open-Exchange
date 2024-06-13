@@ -17,7 +17,7 @@ router.post('/upload-from-url', async (req, res) => {
       const destinationFileName = imageName; // Use the provided image name
   
       // Upload image to Google Cloud Storage from URL
-      await uploadFileFromUrl(bucketName, imageUrl, destinationFileName);
+      await storeImageIntoGcs.uploadFileFromUrl(bucketName, imageUrl, destinationFileName);
   
       res.status(200).send('Image uploaded successfully.');
     } catch (error) {

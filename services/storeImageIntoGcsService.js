@@ -1,7 +1,7 @@
 const { Storage } = require('@google-cloud/storage');
-const got = require('got').default;
 
 async function uploadFileFromUrl(bucketName, imageUrl, destinationFileName) {
+    const got = (await import('got')).default;
     const storage = new Storage();
     const bucket = storage.bucket(bucketName);
   

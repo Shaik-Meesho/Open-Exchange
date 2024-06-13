@@ -9,7 +9,7 @@ async function createNonStreamingMultipartContent(
   projectId = process.env.PROJECT_ID,
   location = 'us-central1',
   model = 'gemini-1.5-flash-001',
-  image = 'gs://cloud-ai-platform-19fcbbee-05c5-447d-99e4-d2fbe026fcd1/hack-image/Screenshot 2024-06-13 at 4.44.23 PM.png',
+  image = 'gs://open-exchange/phone_cover.jpg',
   mimeType = 'image/jpeg'
 ) {
   // Initialize Vertex with your Cloud project and location
