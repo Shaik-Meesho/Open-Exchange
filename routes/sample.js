@@ -36,6 +36,11 @@ router.get('/api' , (req, res) => {
 
 router.get('/image' , (req , res) => {
     const imageApiResponse = imageApi.createNonStreamingMultipartContent()
+    if(imageApiResponse){
+        res.json(imageApiResponse)
+    } else {
+        res.status(404).send("No response");
+    }
 })
 
 module.exports = router;
