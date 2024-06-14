@@ -1,27 +1,10 @@
 const Product = require('../modals/products');
+const fetchProductDetails = require('../utils/getProductDetails');
 
 const getProductDetails = async (req, res, next) => {
   try {
     const productIds = req.params.id; // Assuming product IDs are sent in the request body
-
-    const myHeaders = new fetch.Headers();
-    myHeaders.append("Authorization", "Token bYTFfK5Czo42zfhMmPQoUvXmWiSJ9fV8EbTKdQfDFL4A40tJ");
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("MEESHO-ISO-COUNTRY-CODE", "IN");
-
-    const raw = JSON.stringify({
-      "product_ids": productIds
-    });
-
-    const requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: raw,
-      redirect: "follow"
-    };
-
-    const response = await fetch("https://taxonomy-indexer.prd.meesho.int/api/v2/product/aggregation", requestOptions);
-    const result = await response.json(); // Assuming the response is in JSON format
+     const result = await fetchProductDetails(productIds);
 
     res.status(200).json({
       success: true,
@@ -34,8 +17,10 @@ const getProductDetails = async (req, res, next) => {
   }
 };
 const exchangeReason = async (req, res, next) => {
-    // const {issues,productId}=req.body;
-  let issues=['quality',"fabric"]
+    const {issues,productId}=req.body;
+//   let issues=['quality',"fabric"]
+  const productDetail=await fetchProductDetails(productId);
+  
   try {
     const myHeaders = new Headers();
     myHeaders.append("X-WISHLIST-AGGREGATION-REQUIRED", "true");
