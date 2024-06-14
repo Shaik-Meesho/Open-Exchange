@@ -1,10 +1,28 @@
 const Product = require('../modals/products');
-const fetchProductDetails = require('../utils/getProductDetails');
+const { uploadFileFromUrl } = require('../services/storeImageIntoGcsService');
 
 const getProductDetails = async (req, res, next) => {
   try {
     const productIds = req.params.id; // Assuming product IDs are sent in the request body
-     const result = await fetchProductDetails(productIds);
+
+    const myHeaders = new fetch.Headers();
+    myHeaders.append("Authorization", "Token bYTFfK5Czo42zfhMmPQoUvXmWiSJ9fV8EbTKdQfDFL4A40tJ");
+    myHeaders.append("Content-Type", "application/json");
+    myHeaders.append("MEESHO-ISO-COUNTRY-CODE", "IN");
+
+    const raw = JSON.stringify({
+      "product_ids": productIds
+    });
+
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow"
+    };
+
+    const response = await fetch("https://taxonomy-indexer.prd.meesho.int/api/v2/product/aggregation", requestOptions);
+    const result = await response.json(); // Assuming the response is in JSON format
 
     res.status(200).json({
       success: true,
@@ -17,10 +35,8 @@ const getProductDetails = async (req, res, next) => {
   }
 };
 const exchangeReason = async (req, res, next) => {
-    const {issues,productId}=req.body;
-//   let issues=['quality',"fabric"]
-  const productDetail=await fetchProductDetails(productId);
-  
+    // const {issues,productId}=req.body;
+  let issues=['quality',"fabric"]
   try {
     const myHeaders = new Headers();
     myHeaders.append("X-WISHLIST-AGGREGATION-REQUIRED", "true");
@@ -159,15 +175,57 @@ const exchangeReason = async (req, res, next) => {
     const response = await fetch("https://prod-app-internal.meeshoapi.com/api/3.0/catalogs", requestOptions);
     const result = await response.text();
 
+    // res.status(200).json({
+    //   success: true,
+    //   message: "Choice sent successfully",
+    //   result,
+    // });
+
+    
+    const data = extractProductDetails(result);
+     // Add timestamp to the image name
+     const timestamp = Date.now();
+     const fileExtension = imageName.split('.').pop(); // Get the file extension
+     const baseName = imageName.replace(`.${fileExtension}`, ''); // Get the base name without extension
+     const destinationFileName = `${baseName}_${timestamp}.${fileExtension}`;
+
+   await uploadFileFromUrl('open-exchange',data.image , destinationFileName);
+    
     res.status(200).json({
-      success: true,
-      message: "Choice sent successfully",
-      result,
-    });
+        success: true,
+        message: "Choice sent successfully",
+        uploadedRes ,
+      });
 
   } catch (error) {
     next(error);
   }
 };
 
+const extractProductDetails = (result) => {
+    try {
+      // Parse the JSON data
+      const parsedData = JSON.parse(result);
+
+      // Check if there are any catalogs
+      if (!parsedData.catalogs || parsedData.catalogs.length === 0) {
+        return null;
+      }
+
+      // Extract the first catalog item
+      const firstCatalog = parsedData.catalogs[0];
+  
+      // Extract the description and image
+      const productDetail = {
+        description: firstCatalog.description,
+        image: firstCatalog.image
+      };
+  
+      return productDetail;
+  
+    } catch (error) {
+      console.error('Error parsing data:', error);
+      return [];
+    }
+  };
 module.exports = { exchangeReason, getProducts, getProductDetails };

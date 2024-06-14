@@ -1,15 +1,15 @@
 const {VertexAI} = require('@google-cloud/vertexai');
 require('dotenv').config()
+const imgUrl = require('./promptGenerationService');
 /**
  * TODO(developer): Update these variables before running the sample.
  */
-
 
 async function createNonStreamingMultipartContent(
   projectId = process.env.PROJECT_ID,
   location = 'us-central1',
   model = 'gemini-1.5-flash-001',
-  image = 'gs://open-exchange/phone_cover.jpg',
+  image = imgUrl, //'gs://open-exchange/phone_cover.jpg',
   mimeType = 'image/jpeg'
 ) {
   // Initialize Vertex with your Cloud project and location
@@ -29,7 +29,7 @@ async function createNonStreamingMultipartContent(
   };
 
   const textPart = {
-    text: 'what is shown in this image? And give the keywords by seeing the image',
+    text: 'Vivo V20 Pro Cases & Covers, give only three or four words prompt',
   };
 
   const request = {

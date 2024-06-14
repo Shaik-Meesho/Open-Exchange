@@ -2,7 +2,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const sampleRoute = require('./routes/sample');
 const promptSearch = require('./routes/promptSearch');
 const Product = require('./modals/products');
 const OrderedProduct = require('./modals/orderedProduct');
@@ -11,6 +10,10 @@ const { productData } = require('./data/productData');
 const { orderedProductData } = require('./data/orderedData');
 const { orderReviews } = require('./data/orderReview');
 const storeImgIntoGcs = require('./routes/storeImageIntoGcsRoute')
+
+const promptFromImage = require('./routes/PromptFromImage');
+
+// const productDetails = require('./routes/getProdcutDetailsByIdRoute');
 
 require('dotenv').config();
 
@@ -22,10 +25,11 @@ app.use(bodyParser.json());
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(sampleRoute);
+// app.use(productDetails);
 
 app.use(promptSearch);
 
+app.use(promptFromImage);
 // app.use(imageRoutes);
 app.use(storeImgIntoGcs);
 

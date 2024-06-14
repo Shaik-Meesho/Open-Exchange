@@ -14,7 +14,13 @@ router.post('/upload-from-url', async (req, res) => {
       }
   
       const bucketName = 'open-exchange'; // Your GCS bucket name
-      const destinationFileName = imageName; // Use the provided image name
+
+      // Add timestamp to the image name
+      const timestamp = Date.now();
+      const fileExtension = imageName.split('.').pop(); // Get the file extension
+      const baseName = imageName.replace(`.${fileExtension}`, ''); // Get the base name without extension
+      const destinationFileName = `${baseName}_${timestamp}.${fileExtension}`; // Append timestamp
+         // Use the provided image name
   
       // Upload image to Google Cloud Storage from URL
       await storeImageIntoGcs.uploadFileFromUrl(bucketName, imageUrl, destinationFileName);
