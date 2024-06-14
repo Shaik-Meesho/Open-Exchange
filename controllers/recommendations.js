@@ -65,8 +65,8 @@ const extractProductDetails = (result) => {
 };
 
 const exchangeReason = async (req, res, next) => {
-  const {query } = req.body;
-  console.log("query",query)
+  const {issues,productId } = req.body;
+  console.log("issues",issues)
   try {
     const myHeaders1 = new fetch.Headers();
     myHeaders1.append("Authorization", "Token bYTFfK5Czo42zfhMmPQoUvXmWiSJ9fV8EbTKdQfDFL4A40tJ");
@@ -74,7 +74,7 @@ const exchangeReason = async (req, res, next) => {
     myHeaders1.append("MEESHO-ISO-COUNTRY-CODE", "IN");
 
     const raw1 = JSON.stringify({
-      "product_ids": [1470138]
+      "product_ids": [productId]
     });
 
     const requestOptions1 = {
@@ -125,7 +125,7 @@ const exchangeReason = async (req, res, next) => {
         session_state: null,
         selectedFilterIds: [],
         isClearFilterClicked: false,
-        query: pDetail.catalogs[0].description,
+        query: pDetail.catalogs[0].description+"better in these specification"+issues.main+" "+issues.sub,
         intent_payload: null,
         is_voice_search: false,
         is_autocorrect_reverted: false,

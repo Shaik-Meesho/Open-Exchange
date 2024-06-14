@@ -2,13 +2,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const promptSearch = require('./routes/promptSearch');
-const Product = require('./modals/products');
-const OrderedProduct = require('./modals/orderedProduct');
-const Review = require('./modals/review');
-const { productData } = require('./data/productData');
-const { orderedProductData } = require('./data/orderedData');
-const { orderReviews } = require('./data/orderReview');
 const storeImgIntoGcs = require('./routes/storeImageIntoGcsRoute')
 
 const promptFromImage = require('./routes/PromptFromImage');
@@ -26,7 +21,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // app.use(productDetails);
-
+app.use(cors());
 app.use(promptSearch);
 
 app.use(promptFromImage);
