@@ -1,17 +1,19 @@
-const Product = require('../modals/products');
 const { uploadFileFromUrl } = require('../services/storeImageIntoGcsService');
+const fetchProductDetails = require('../utils/getProductDetails');
+const fetch = require('node-fetch');
 
 const getProductDetails = async (req, res, next) => {
   try {
     const productIds = req.params.id; // Assuming product IDs are sent in the request body
-
+//    const result=await fetchProductDetails([productIds])
+console.log("productIds",productIds)
     const myHeaders = new fetch.Headers();
     myHeaders.append("Authorization", "Token bYTFfK5Czo42zfhMmPQoUvXmWiSJ9fV8EbTKdQfDFL4A40tJ");
     myHeaders.append("Content-Type", "application/json");
     myHeaders.append("MEESHO-ISO-COUNTRY-CODE", "IN");
 
     const raw = JSON.stringify({
-      "product_ids": productIds
+      "product_ids": [productIds]
     });
 
     const requestOptions = {
@@ -21,7 +23,7 @@ const getProductDetails = async (req, res, next) => {
       redirect: "follow"
     };
 
-    const response = await fetch("https://taxonomy-indexer.prd.meesho.int/api/v2/product/aggregation", requestOptions);
+    const response = await fetch("http://taxonomy-indexer.prd.meesho.int/api/v2/product/aggregation", requestOptions);
     const result = await response.json(); // Assuming the response is in JSON format
 
     res.status(200).json({
@@ -34,11 +36,68 @@ const getProductDetails = async (req, res, next) => {
     next(error);
   }
 };
-const exchangeReason = async (req, res, next) => {
-    // const {issues,productId}=req.body;
-  let issues=['quality',"fabric"]
+
+const extractProductDetails = (result) => {
   try {
-    const myHeaders = new Headers();
+    // Parse the JSON data
+    const parsedData = JSON.parse(result);
+
+    // Check if there are any catalogs
+    if (!parsedData.catalogs || parsedData.catalogs.length === 0) {
+      return null;
+    }
+
+    // Extract the first catalog item
+    const firstCatalog = parsedData.catalogs[0];
+
+    // Extract the description and image
+    const productDetail = {
+      description: firstCatalog.description,
+      image: firstCatalog.image
+    };
+
+    return productDetail;
+
+  } catch (error) {
+    console.error('Error parsing data:', error);
+    return [];
+  }
+};
+
+const exchangeReason = async (req, res, next) => {
+  const {query } = req.body;
+  console.log("query",query)
+  try {
+    const myHeaders1 = new fetch.Headers();
+    myHeaders1.append("Authorization", "Token bYTFfK5Czo42zfhMmPQoUvXmWiSJ9fV8EbTKdQfDFL4A40tJ");
+    myHeaders1.append("Content-Type", "application/json");
+    myHeaders1.append("MEESHO-ISO-COUNTRY-CODE", "IN");
+
+    const raw1 = JSON.stringify({
+      "product_ids": [1470138]
+    });
+
+    const requestOptions1 = {
+      method: "POST",
+      headers: myHeaders1,
+      body: raw1,
+      redirect: "follow"
+    };
+
+    const response1 = await fetch("http://taxonomy-indexer.prd.meesho.int/api/v2/product/aggregation", requestOptions1);
+    const pDetail = await response1.json();
+    console.log("pDetail",pDetail)
+//     const data = extractProductDetails(pDetail);
+//    console.log("data ext",data)
+    // // Add timestamp to the image name
+    // const timestamp = Date.now();
+    // const fileExtension = data.image.split('.').pop(); // Get the file extension
+    // const baseName = data.image.replace(`.${fileExtension}`, ''); // Get the base name without extension
+    // const destinationFileName = `${baseName}_${timestamp}.${fileExtension}`;
+
+    // await uploadFileFromUrl('open-exchange', imageUrl, destinationFileName);
+
+    const myHeaders = new fetch.Headers();
     myHeaders.append("X-WISHLIST-AGGREGATION-REQUIRED", "true");
     myHeaders.append("Authorization", "32c4d8137cn9eb493a1921f203173080");
     myHeaders.append("App-Version", "18.2.1-beta-dev debug");
@@ -66,7 +125,7 @@ const exchangeReason = async (req, res, next) => {
         session_state: null,
         selectedFilterIds: [],
         isClearFilterClicked: false,
-        query: "yellow shoes",
+        query: pDetail.catalogs[0].description,
         intent_payload: null,
         is_voice_search: false,
         is_autocorrect_reverted: false,
@@ -110,9 +169,8 @@ const exchangeReason = async (req, res, next) => {
   }
 };
 
-
- const getProducts = async (req, res, next) => {
-
+const getProducts = async (req, res, next) => {
+    const {query}=req.body;
   try {
     const myHeaders = new Headers();
     myHeaders.append("X-WISHLIST-AGGREGATION-REQUIRED", "true");
@@ -142,7 +200,7 @@ const exchangeReason = async (req, res, next) => {
         session_state: null,
         selectedFilterIds: [],
         isClearFilterClicked: false,
-        query: "yellow shoes",
+        query: query,
         intent_payload: null,
         is_voice_search: false,
         is_autocorrect_reverted: false,
@@ -175,57 +233,15 @@ const exchangeReason = async (req, res, next) => {
     const response = await fetch("https://prod-app-internal.meeshoapi.com/api/3.0/catalogs", requestOptions);
     const result = await response.text();
 
-    // res.status(200).json({
-    //   success: true,
-    //   message: "Choice sent successfully",
-    //   result,
-    // });
-
-    
-    const data = extractProductDetails(result);
-     // Add timestamp to the image name
-     const timestamp = Date.now();
-     const fileExtension = imageName.split('.').pop(); // Get the file extension
-     const baseName = imageName.replace(`.${fileExtension}`, ''); // Get the base name without extension
-     const destinationFileName = `${baseName}_${timestamp}.${fileExtension}`;
-
-   await uploadFileFromUrl('open-exchange',data.image , destinationFileName);
-    
     res.status(200).json({
-        success: true,
-        message: "Choice sent successfully",
-        uploadedRes ,
-      });
+      success: true,
+      message: "Products fetched successfully",
+      result,
+    });
 
   } catch (error) {
     next(error);
   }
 };
 
-const extractProductDetails = (result) => {
-    try {
-      // Parse the JSON data
-      const parsedData = JSON.parse(result);
-
-      // Check if there are any catalogs
-      if (!parsedData.catalogs || parsedData.catalogs.length === 0) {
-        return null;
-      }
-
-      // Extract the first catalog item
-      const firstCatalog = parsedData.catalogs[0];
-  
-      // Extract the description and image
-      const productDetail = {
-        description: firstCatalog.description,
-        image: firstCatalog.image
-      };
-  
-      return productDetail;
-  
-    } catch (error) {
-      console.error('Error parsing data:', error);
-      return [];
-    }
-  };
 module.exports = { exchangeReason, getProducts, getProductDetails };

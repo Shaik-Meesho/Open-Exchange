@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { generateTextContent } = require('../services/textService');
-const { exchangeReason, getProducts } = require('../controllers/recommendations');
+const { exchangeReason, getProducts,getProductDetails } = require('../controllers/recommendations');
 
 router.post('/generate-text', async (req, res) => {
   try {
@@ -14,7 +14,7 @@ router.post('/generate-text', async (req, res) => {
   }
 });
 router.post("/returnReason",exchangeReason)
-router.get("/getProducts",getProducts)
-router.get("/getProductDetails/:id",getProducts)
+router.post("/getProducts",getProducts)
+router.get("/getProductDetails/:id",getProductDetails)
 
 module.exports = router;
